@@ -1,73 +1,97 @@
-# React + TypeScript + Vite
+# sistema-inventario-ui
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend del Sistema de Inventario y Ventas. Aplicación React que consume un servicio WCF SOAP para gestionar productos, categorías, proveedores, clientes y ventas.
 
-Currently, two official plugins are available:
+Forma parte del monorepo [sistema-inventario](https://github.com/RamonCheno/sistema-inventario).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- **React 19** + **TypeScript**
+- **Vite** — bundler y dev server
+- **pnpm** — gestor de paquetes
+- **React Router DOM v7** — navegación SPA
+- **React Hook Form + Zod** — formularios y validación
+- **Fetch API** — comunicación SOAP con el backend WCF
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Requisitos previos
 
-## Expanding the ESLint configuration
+- Node.js 18+
+- pnpm
+- Backend [`sistema-inventario-ws`](https://github.com/RamonCheno/sistema-inventario-ws) corriendo en `http://localhost:51842`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Instalación
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Desarrollo
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+pnpm dev
 ```
+
+La aplicación queda disponible en `http://localhost:5173`.
+
+## Build
+
+```bash
+pnpm build
+```
+
+## Scripts disponibles
+
+| Comando | Descripción |
+|---|---|
+| `pnpm dev` | Inicia el servidor de desarrollo con HMR |
+| `pnpm build` | Compila TypeScript y genera el bundle de producción |
+| `pnpm preview` | Previsualiza el bundle de producción localmente |
+| `pnpm lint` | Ejecuta ESLint sobre el proyecto |
+
+## Estructura del proyecto
+
+```
+src/
+├── components/
+│   └── Layout.tsx          ← Componente de layout principal con navegación
+├── pages/
+│   ├── CategoriasPage.tsx  ← CRUD de categorías
+│   ├── ClientesPage.tsx    ← CRUD de clientes
+│   ├── ProductosPage.tsx   ← CRUD de productos (con stock y proveedor)
+│   ├── ProveedorPage.tsx   ← CRUD de proveedores
+│   └── VentasPage.tsx      ← Registro y consulta de ventas
+├── services/
+│   ├── soapClient.ts       ← Cliente SOAP genérico (fetch + XML)
+│   ├── categoriaService.ts
+│   ├── clientesServices.ts
+│   ├── productoService.ts
+│   ├── proveedorService.ts
+│   └── ventasServices.ts
+├── types/
+│   └── inventario.ts       ← Interfaces TypeScript del dominio
+└── main.tsx
+```
+
+## Comunicación con el backend
+
+El cliente SOAP (`src/services/soapClient.ts`) construye envelopes SOAP manualmente y los envía mediante `fetch` al endpoint:
+
+```
+http://localhost:51842/InventarioService.svc
+```
+
+## Modelos del dominio
+
+| Entidad | Campos principales |
+|---|---|
+| `Categoria` | Id, Nombre |
+| `Proveedor` | Id, Nombre, Telefono, Email |
+| `Producto` | Id, Nombre, Precio, Stock, StockMinimo, CategoriaId, ProveedorId |
+| `Cliente` | Id, Nombre, Telefono, Email |
+| `Venta` | Id, Fecha, Total, ClienteId, Detalles[] |
+| `DetalleVenta` | Id, ProductoId, Cantidad, PrecioUnitario |
+
+## Contexto
+
+Proyecto de aprendizaje — Fase 2 del roadmap React JS → React Native.
+Enfoque: React JS Avanzado + integración con servicios WCF SOAP (C# / .NET Framework 4.8).
