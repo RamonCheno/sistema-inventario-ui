@@ -26,7 +26,7 @@ export async function callSoap(operation: string, params: Record<string, string>
     method: 'POST',
     headers: {
       'Content-Type': 'text/xml',
-      SOAPAction: `"${SOAP_NS}${operation}"`,
+      SOAPAction: `"${SOAP_NS}IInventarioService/${operation}"`,
     },
     body,
   });
