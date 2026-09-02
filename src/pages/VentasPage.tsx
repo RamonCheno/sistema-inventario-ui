@@ -3,6 +3,7 @@ import type { Cliente, Producto, Venta } from '../types/inventario';
 import { getProductos } from '../services/productoService';
 import { getClientes } from '../services/clientesServices';
 import { createVenta, deleteVenta, getVentas } from '../services/ventasServices';
+import { ApiError } from '../services/apiClient';
 
 export default function VentasPage() {
   //1. Estado
@@ -12,7 +13,7 @@ export default function VentasPage() {
   const [loading, setLoading] = useState(true);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [clienteId, setClienteId] = useState(0);
-  const [detalles, setDetalles] = useState<{ ProductoId: number; Cantidad: number }[]>([]);
+  const [detalles, setDetalles] = useState<{ productoId: number; cantidad: number }[]>([]);
 
   //2. useEffect -> cargar al montar
   useEffect(() => {
@@ -30,10 +31,10 @@ export default function VentasPage() {
   }
 
   function agregarDetalles() {
-    setDetalles([...detalles, { ProductoId: 0, Cantidad: 1 }]);
+    setDetalles([...detalles, { productoId: 0, cantidad: 1 }]);
   }
 
-  function actualizarDetalles(index: number, campo: 'ProductoId' | 'Cantidad', valor: number) {
+  function actualizarDetalles(index: number, campo: 'productoId' | 'cantidad', valor: number) {
     const nuevos = [...detalles];
     nuevos[index] = { ...nuevos[index], [campo]: valor };
     setDetalles(nuevos);
@@ -45,9 +46,13 @@ export default function VentasPage() {
 
   async function guardar() {
     if (clienteId === 0 || detalles.length === 0) return;
-    await createVenta(clienteId, detalles);
-    cancelar();
-    cargar();
+    try {
+      await createVenta(clienteId, detalles);
+      cancelar();
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
+    }
   }
 
   function abrirCrear() {
@@ -63,8 +68,12 @@ export default function VentasPage() {
   }
   async function eliminar(id: number) {
     if (!confirm('¿Eliminar esta venta?')) return;
-    await deleteVenta(id);
-    cargar();
+    try {
+      await deleteVenta(id);
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
+    }
   }
 
   //4. TSX: botón "Nueva", formulario
@@ -83,8 +92,8 @@ export default function VentasPage() {
           <select value={clienteId} onChange={e => setClienteId(Number(e.target.value))}>
             <option value={0}>-- Seleccion cliente --</option>
             {clientes.map(cli => (
-              <option key={cli.Id} value={cli.Id}>
-                {cli.Nombre}
+              <option key={cli.id} value={cli.id}>
+                {cli.nombre}
               </option>
             ))}
           </select>
@@ -93,15 +102,15 @@ export default function VentasPage() {
 
           {detalles.map((detalle, index) => (
             <div key={index}>
-              <select value={detalle.ProductoId} onChange={e => actualizarDetalles(index, 'ProductoId', Number(e.target.value))}>
+              <select value={detalle.productoId} onChange={e => actualizarDetalles(index, 'productoId', Number(e.target.value))}>
                 <option value={0}>-- Selecciona producto --</option>
                 {productos.map(p => (
-                  <option key={p.Id} value={p.Id}>
-                    {p.Nombre}
+                  <option key={p.id} value={p.id}>
+                    {p.nombre}
                   </option>
                 ))}
               </select>
-              <input type="number" value={detalle.Cantidad} onChange={e => actualizarDetalles(index, 'Cantidad', Number(e.target.value))} />
+              <input type="number" value={detalle.cantidad} onChange={e => actualizarDetalles(index, 'cantidad', Number(e.target.value))} />
               <button onClick={() => eliminarDetalles(index)}>X</button>
             </div>
           ))}
@@ -130,14 +139,14 @@ export default function VentasPage() {
           </thead>
           <tbody>
             {ventas.map(venta => (
-              <tr key={venta.Id}>
-                <td>{venta.Id}</td>
-                <td>{venta.Fecha}</td>
-                <td>{venta.Cliente?.Nombre ?? '-'}</td>
-                <td>{venta.Total.toFixed(2)}</td>
-                <td>{venta.Detalles.length} producto(s)</td>
+              <tr key={venta.id}>
+                <td>{venta.id}</td>
+                <td>{venta.fecha}</td>
+                <td>{clientes.find(c => c.id === venta.clienteId)?.nombre ?? '-'}</td>
+                <td>{venta.total.toFixed(2)}</td>
+                <td>{venta.detalles.length} producto(s)</td>
                 <td>
-                  <button onClick={() => eliminar(venta.Id)}>Eliminar</button>
+                  <button onClick={() => eliminar(venta.id)}>Eliminar</button>
                 </td>
               </tr>
             ))}

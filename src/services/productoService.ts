@@ -1,30 +1,22 @@
-import { callSoap } from './soapClient';
+import { apiClient } from './apiClient';
 import type { Producto } from '../types/inventario';
 
-type ProductoCreate = Omit<Producto, 'Id' | 'Categoria' | 'Proveedor'>;
-type ProductoUpdate = Omit<Producto, 'Categoria' | 'Proveedor'>;
-
 export async function getProductos(): Promise<Producto[]> {
-  const result = await callSoap('GetProductos');
-  return JSON.parse(result);
+  return apiClient.get<Producto[]>('/api/Productos');
 }
 
 export async function getProductoById(id: number): Promise<Producto> {
-  const result = await callSoap('GetProductoById', { id: String(id) });
-  return JSON.parse(result);
+  return apiClient.get<Producto>(`/api/Productos/${id}`);
 }
 
-export async function createProducto(data: ProductoCreate): Promise<Producto> {
-  const result = await callSoap('CreateProducto', { json: JSON.stringify(data) });
-  return JSON.parse(result);
+export async function createProducto(data: Omit<Producto, 'id'>): Promise<Producto> {
+  return apiClient.post<Producto>('/api/Productos', data);
 }
 
-export async function updateProducto(data: ProductoUpdate): Promise<Producto> {
-  const result = await callSoap('UpdateProducto', { json: JSON.stringify(data) });
-  return JSON.parse(result);
+export async function updateProducto(id: number, data: Omit<Producto, 'id'>): Promise<void> {
+  return apiClient.put<void>(`/api/Productos/${id}`, data);
 }
 
-export async function deleteProducto(id: number): Promise<boolean> {
-  const result = await callSoap('DeleteProducto', { id: String(id) });
-  return result === 'true';
+export async function deleteProducto(id: number): Promise<void> {
+  return apiClient.delete(`/api/Productos/${id}`);
 }

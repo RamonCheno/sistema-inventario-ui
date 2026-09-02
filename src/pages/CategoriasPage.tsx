@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Categoria } from '../types/inventario';
 import { getCategorias, updateCategoria, deleteCategoria, createCategoria } from '../services/categoriaService';
+import { ApiError } from '../services/apiClient';
 
 export default function CategoriasPage() {
   //1. Estado
@@ -30,25 +31,33 @@ export default function CategoriasPage() {
 
   function abrirEditar(cat: Categoria) {
     setEditando(cat);
-    setNombre(cat.Nombre);
+    setNombre(cat.nombre);
     setMostrarForm(true);
   }
 
   async function guardar() {
     if (!nombre.trim()) return;
-    if (editando) {
-      await updateCategoria({ ...editando, Nombre: nombre });
-    } else {
-      await createCategoria({ Nombre: nombre });
+    try {
+      if (editando) {
+        await updateCategoria(editando.id, { nombre });
+      } else {
+        await createCategoria({ nombre });
+      }
+      cancelar();
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
     }
-    cancelar();
-    cargar();
   }
 
   async function eliminar(id: number) {
     if (!confirm('¿Eliminar esta categoría?')) return;
-    await deleteCategoria(id);
-    cargar();
+    try {
+      await deleteCategoria(id);
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
+    }
   }
 
   function cancelar() {
@@ -91,12 +100,12 @@ export default function CategoriasPage() {
           </thead>
           <tbody>
             {categorias.map(cat => (
-              <tr key={cat.Id}>
-                <td>{cat.Id}</td>
-                <td>{cat.Nombre}</td>
+              <tr key={cat.id}>
+                <td>{cat.id}</td>
+                <td>{cat.nombre}</td>
                 <td>
                   <button onClick={() => abrirEditar(cat)}>Editar</button>
-                  <button onClick={() => eliminar(cat.Id)}>Eliminar</button>
+                  <button onClick={() => eliminar(cat.id)}>Eliminar</button>
                 </td>
               </tr>
             ))}

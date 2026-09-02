@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Proveedor } from '../types/inventario';
 import { createProveedor, deleteProveedor, getProveedores, updateProveedor } from '../services/proveedorService';
+import { ApiError } from '../services/apiClient';
 
 export default function ProveedoresPage() {
   //1. Estado
@@ -33,27 +34,35 @@ export default function ProveedoresPage() {
 
   function abrirEditar(prov: Proveedor) {
     setEditando(prov);
-    setNombre(prov.Nombre);
-    setTelefono(prov.Telefono ?? '');
-    setEmail(prov.Email ?? '');
+    setNombre(prov.nombre);
+    setTelefono(prov.telefono ?? '');
+    setEmail(prov.email ?? '');
     setMostrarForm(true);
   }
 
   async function guardar() {
     if (!nombre.trim()) return;
-    if (editando) {
-      await updateProveedor({ ...editando, Nombre: nombre, Email: email, Telefono: telefono });
-    } else {
-      await createProveedor({ Nombre: nombre, Email: email, Telefono: telefono });
+    try {
+      if (editando) {
+        await updateProveedor(editando.id, { nombre, email, telefono });
+      } else {
+        await createProveedor({ nombre, email, telefono });
+      }
+      cancelar();
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
     }
-    cancelar();
-    cargar();
   }
 
   async function eliminar(id: number) {
     if (!confirm('¿Eliminar este proveedor?')) return;
-    await deleteProveedor(id);
-    cargar();
+    try {
+      await deleteProveedor(id);
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
+    }
   }
 
   function cancelar() {
@@ -104,14 +113,14 @@ export default function ProveedoresPage() {
           </thead>
           <tbody>
             {proveedores.map(prov => (
-              <tr key={prov.Id}>
-                <td>{prov.Id}</td>
-                <td>{prov.Nombre}</td>
-                <td>{prov.Email ?? '-'}</td>
-                <td>{prov.Telefono ?? '-'}</td>
+              <tr key={prov.id}>
+                <td>{prov.id}</td>
+                <td>{prov.nombre}</td>
+                <td>{prov.email ?? '-'}</td>
+                <td>{prov.telefono ?? '-'}</td>
                 <td>
                   <button onClick={() => abrirEditar(prov)}>Editar</button>
-                  <button onClick={() => eliminar(prov.Id)}>Eliminar</button>
+                  <button onClick={() => eliminar(prov.id)}>Eliminar</button>
                 </td>
               </tr>
             ))}

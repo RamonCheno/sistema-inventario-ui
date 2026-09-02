@@ -1,47 +1,43 @@
 export interface Categoria {
-  Id: number;
-  Nombre: string;
+  id: number;
+  nombre: string;
 }
 
 export interface Proveedor {
-  Id: number;
-  Nombre: string;
-  Telefono?: string;
-  Email?: string;
+  id: number;
+  nombre: string;
+  telefono: string;
+  email: string;
 }
 
 export interface Producto {
-  Id: number;
-  Nombre: string;
-  Precio: number;
-  Stock: number;
-  StockMinimo: number;
-  CategoriaId: number;
-  Categoria?: Categoria;
-  ProveedorId: number;
-  Proveedor?: Proveedor;
+  id: number;
+  nombre: string;
+  precio: number;
+  stock: number;
+  stockMinimo: number;
+  categoriaId: number;
+  proveedorId: number;
 }
 
 export interface Cliente {
-  Id: number;
-  Nombre: string;
-  Telefono?: string;
-  Email?: string;
+  id: number;
+  nombre: string;
+  email: string;
+  telefono: string;
 }
 
 export interface DetalleVenta {
-  Id: number;
-  ProductoId: number;
-  Producto?: Producto;
-  Cantidad: number;
-  PrecioUnitario: number;
+  id: number;
+  productoId: number;
+  cantidad: number;
+  precioUnitario: number;
 }
 
 export interface Venta {
-  Id: number;
-  Fecha: string;
-  Total: number;
-  ClienteId: number;
-  Cliente?: Cliente;
-  Detalles: DetalleVenta[];
+  id: number;
+  fecha: string;
+  total: number;
+  clienteId: number;
+  detalles: DetalleVenta[];
 }

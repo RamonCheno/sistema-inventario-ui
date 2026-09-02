@@ -50,35 +50,34 @@ export default function ProductosPage() {
 
   function abrirEditar(prods: Producto) {
     setEditando(prods);
-    setNombre(prods.Nombre);
-    setPrecio(prods.Precio);
-    setStock(prods.Stock);
-    setStockMinimo(prods.StockMinimo);
-    setCategoriaId(prods.CategoriaId);
-    setProveedorId(prods.ProveedorId);
+    setNombre(prods.nombre);
+    setPrecio(prods.precio);
+    setStock(prods.stock);
+    setStockMinimo(prods.stockMinimo);
+    setCategoriaId(prods.categoriaId);
+    setProveedorId(prods.proveedorId);
     setMostrarForm(true);
   }
 
   async function guardar() {
     if (!nombre.trim()) return;
     if (editando) {
-      await updateProducto({
-        ...editando,
-        Nombre: nombre,
-        Precio: precio,
-        Stock: stock,
-        StockMinimo: stockMinimo,
-        CategoriaId: categoriaId,
-        ProveedorId: proveedorId,
+      await updateProducto(editando.id, {
+        nombre: nombre,
+        precio: precio,
+        stock: stock,
+        stockMinimo: stockMinimo,
+        categoriaId: categoriaId,
+        proveedorId: proveedorId,
       });
     } else {
       await createProducto({
-        Nombre: nombre,
-        Precio: precio,
-        Stock: stock,
-        StockMinimo: stockMinimo,
-        CategoriaId: categoriaId,
-        ProveedorId: proveedorId,
+        nombre: nombre,
+        precio: precio,
+        stock: stock,
+        stockMinimo: stockMinimo,
+        categoriaId: categoriaId,
+        proveedorId: proveedorId,
       });
     }
     cancelar();
@@ -126,8 +125,8 @@ export default function ProductosPage() {
           <select value={categoriaId} onChange={e => setCategoriaId(Number(e.target.value))}>
             <option value={0}>-- Selecciona --</option>
             {categorias.map(cat => (
-              <option key={cat.Id} value={cat.Id}>
-                {cat.Nombre}
+              <option key={cat.id} value={cat.id}>
+                {cat.nombre}
               </option>
             ))}
           </select>
@@ -136,8 +135,8 @@ export default function ProductosPage() {
           <select value={proveedorId} onChange={e => setProveedorId(Number(e.target.value))}>
             <option value={0}>-- Selecciona --</option>
             {proveedores.map(prov => (
-              <option key={prov.Id} value={prov.Id}>
-                {prov.Nombre}
+              <option key={prov.id} value={prov.id}>
+                {prov.nombre}
               </option>
             ))}
           </select>
@@ -169,17 +168,17 @@ export default function ProductosPage() {
           </thead>
           <tbody>
             {productos.map(prod => (
-              <tr key={prod.Id}>
-                <td>{prod.Id}</td>
-                <td>{prod.Nombre}</td>
-                <td>{prod.Precio.toFixed(2)}</td>
-                <td>{prod.Stock}</td>
-                <td>{prod.StockMinimo}</td>
-                <td>{prod.Categoria?.Nombre ?? '-'}</td>
-                <td>{prod.Proveedor?.Nombre ?? '-'}</td>
+              <tr key={prod.id}>
+                <td>{prod.id}</td>
+                <td>{prod.nombre}</td>
+                <td>{prod.precio.toFixed(2)}</td>
+                <td>{prod.stock}</td>
+                <td>{prod.stockMinimo}</td>
+                <td>{categorias.find(c => c.id === prod.categoriaId)?.nombre ?? '-'}</td>
+                <td>{proveedores.find(p => p.id === prod.proveedorId)?.nombre ?? '-'}</td>
                 <td>
                   <button onClick={() => abrirEditar(prod)}>Editar</button>
-                  <button onClick={() => eliminar(prod.Id)}>Eliminar</button>
+                  <button onClick={() => eliminar(prod.id)}>Eliminar</button>
                 </td>
               </tr>
             ))}

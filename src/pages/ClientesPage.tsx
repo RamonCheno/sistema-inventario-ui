@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Cliente } from '../types/inventario';
 import { createCliente, deleteCliente, getClientes, updateCliente } from '../services/clientesServices';
+import { ApiError } from '../services/apiClient';
 
 export default function ClientesPage() {
   //1. Estado
@@ -34,27 +35,35 @@ export default function ClientesPage() {
 
   function abrirEditar(cli: Cliente) {
     setEditando(cli);
-    setNombre(cli.Nombre);
-    setTelefono(cli.Telefono ?? '');
-    setEmail(cli.Email ?? '');
+    setNombre(cli.nombre);
+    setTelefono(cli.telefono ?? '');
+    setEmail(cli.email ?? '');
     setMostrarForm(true);
   }
 
   async function guardar() {
     if (!nombre.trim()) return;
-    if (editando) {
-      await updateCliente({ ...editando, Nombre: nombre, Email: email, Telefono: telefono });
-    } else {
-      await createCliente({ Nombre: nombre, Email: email, Telefono: telefono });
+    try {
+      if (editando) {
+        await updateCliente(editando.id, { nombre, email, telefono });
+      } else {
+        await createCliente({ nombre, email, telefono });
+      }
+      cancelar();
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
     }
-    cancelar();
-    cargar();
   }
 
   async function eliminar(id: number) {
     if (!confirm('¿Eliminar este cliente?')) return;
-    await deleteCliente(id);
-    cargar();
+    try {
+      await deleteCliente(id);
+      cargar();
+    } catch (error) {
+      alert(error instanceof ApiError ? error.message : 'Ocurrió un error inesperado.');
+    }
   }
 
   function cancelar() {
@@ -105,14 +114,14 @@ export default function ClientesPage() {
           </thead>
           <tbody>
             {clientes.map(cli => (
-              <tr key={cli.Id}>
-                <td>{cli.Id}</td>
-                <td>{cli.Nombre}</td>
-                <td>{cli.Email ?? '-'}</td>
-                <td>{cli.Telefono ?? '-'}</td>
+              <tr key={cli.id}>
+                <td>{cli.id}</td>
+                <td>{cli.nombre}</td>
+                <td>{cli.email ?? '-'}</td>
+                <td>{cli.telefono ?? '-'}</td>
                 <td>
                   <button onClick={() => abrirEditar(cli)}>Editar</button>
-                  <button onClick={() => eliminar(cli.Id)}>Eliminar</button>
+                  <button onClick={() => eliminar(cli.id)}>Eliminar</button>
                 </td>
               </tr>
             ))}

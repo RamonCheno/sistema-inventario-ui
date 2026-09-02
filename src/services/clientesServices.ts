@@ -1,27 +1,22 @@
-import { callSoap } from './soapClient'
-import type { Cliente } from '../types/inventario'
+import { apiClient } from './apiClient';
+import type { Cliente } from '../types/inventario';
 
 export async function getClientes(): Promise<Cliente[]> {
-  const result = await callSoap('GetClientes')
-  return JSON.parse(result)
+  return apiClient.get<Cliente[]>('/api/Clientes');
 }
 
 export async function getClienteById(id: number): Promise<Cliente> {
-  const result = await callSoap('GetClienteById', { id: String(id) })
-  return JSON.parse(result)
+  return apiClient.get<Cliente>(`/api/Clientes/${id}`);
 }
 
-export async function createCliente(data: Omit<Cliente, 'Id'>): Promise<Cliente> {
-  const result = await callSoap('CreateCliente', { json: JSON.stringify(data) })
-  return JSON.parse(result)
+export async function createCliente(data: Omit<Cliente, 'id'>): Promise<Cliente> {
+  return apiClient.post<Cliente>('/api/Clientes', data);
 }
 
-export async function updateCliente(data: Cliente): Promise<Cliente> {
-  const result = await callSoap('UpdateCliente', { json: JSON.stringify(data) })
-  return JSON.parse(result)
+export async function updateCliente(id: number, data: Omit<Cliente, 'id'>): Promise<void> {
+  return apiClient.put<void>(`/api/Clientes/${id}`, data);
 }
 
-export async function deleteCliente(id: number): Promise<boolean> {
-  const result = await callSoap('DeleteCliente', { id: String(id) })
-  return result === 'true'
+export async function deleteCliente(id: number): Promise<void> {
+  return apiClient.delete(`/api/Clientes/${id}`);
 }
