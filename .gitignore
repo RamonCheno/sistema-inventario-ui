@@ -12,10 +12,20 @@ dist
 dist-ssr
 *.local
 
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Coverage / build cache
+coverage
+.turbo
+
 # Editor directories and files
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
